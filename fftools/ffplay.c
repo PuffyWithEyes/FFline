@@ -926,6 +926,7 @@ static int upload_texture(SDL_Texture **tex, AVFrame *frame)
             }
             break;
     }
+
     return ret;
 }
 
@@ -2116,12 +2117,21 @@ static int video_thread(void *arg)
     if (!frame)
         return AVERROR(ENOMEM);
 
-    for (;;) {
+    for (int color = 0, line_pos = frame->width*(frame->height/2-1);; color++) { // line_pos - номер строки
+		if (color >= 256)
+			color = 0;
+
         ret = get_video_frame(is, frame);
         if (ret < 0)
             goto the_end;
         if (!ret)
             continue;
+
+		for (int x = line_pos; x < line_pos + frame->width * 3; x++) { // задание строки
+			frame->data[0][x] = 76;
+			frame->data[1][x] = 84;
+			frame->data[2][x] = 255;
+		}
 
         if (   last_w != frame->width
             || last_h != frame->height
