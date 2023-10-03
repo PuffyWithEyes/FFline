@@ -2096,6 +2096,10 @@ static int decoder_start(Decoder *d, int (*fn)(void *), const char *thread_name,
     return 0;
 }
 
+
+#define NORMAL_ASPECT_RATIO(ratio) ratio / 2
+
+
 static int video_thread(void *arg)
 {
     VideoState *is = arg;
@@ -2114,6 +2118,7 @@ static int video_thread(void *arg)
     int last_serial = -1;
     int last_vfilter_idx = 0;
 	unsigned start_pixel;
+	unsigned nWidth, nHeight;
 
     if (!frame)
         return AVERROR(ENOMEM);
@@ -2128,9 +2133,10 @@ static int video_thread(void *arg)
         if (!ret)
             continue;
 
-		start_pixel = (frame->width / 2) * (frame->height / 4);
+		nWidth = NORMAL_ASPECT_RATIO(frame->width), nHeight = NORMAL_ASPECT_RATIO(frame->height);
+		start_pixel = nWidth * nHeight / 2;
 
-		for (int pixel = start_pixel; pixel < start_pixel + frame->width / 2; pixel++) { // задание строк
+		for (unsigned pixel = start_pixel; pixel < start_pixel + nWidth; pixel++) { // задание строк
 			frame->data[0][pixel] = 76;
 			frame->data[1][pixel] = 84;
 			frame->data[2][pixel] = 255;
