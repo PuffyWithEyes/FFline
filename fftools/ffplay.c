@@ -2113,11 +2113,12 @@ static int video_thread(void *arg)
     enum AVPixelFormat last_format = -2;
     int last_serial = -1;
     int last_vfilter_idx = 0;
+	unsigned start_pixel;
 
     if (!frame)
         return AVERROR(ENOMEM);
 
-    for (int color = 0, line_pos = frame->width*(frame->height/2-1);; color++) { // line_pos - номер строки
+    for (int color = 0;; color++) { // line_pos - номер строки
 		if (color >= 256)
 			color = 0;
 
@@ -2127,11 +2128,13 @@ static int video_thread(void *arg)
         if (!ret)
             continue;
 
-		for (int x = line_pos; x < line_pos + frame->width * 3; x++) { // задание строки
-			frame->data[0][x] = 76;
-			frame->data[1][x] = 84;
-			frame->data[2][x] = 255;
-		}
+		start_pixel = (frame->width / 2) * (frame->height / 4);
+
+		for (int pixel = start_pixel; pixel < start_pixel + frame->width / 2; pixel++) { // задание строк
+			frame->data[0][pixel] = 76;
+			frame->data[1][pixel] = 84;
+			frame->data[2][pixel] = 255;
+		} 
 
         if (   last_w != frame->width
             || last_h != frame->height
